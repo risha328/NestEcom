@@ -5,4 +5,10 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
+  getStatus(): string {
+    return 'OK';
+  }
+  getPing(): string {
+    return 'pong';
+  }
 }
