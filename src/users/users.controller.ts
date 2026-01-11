@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSignupDto } from './dto/user-signup.dto';
 import { UserEntity } from './entities/user.entity';
 import { UserSigninDto } from './dto/user-signin.dto';
+import { CurrentUser } from './utility/decorators/current-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -28,14 +29,22 @@ export class UsersController {
     return 'hi';
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('all')
+  async findAll() : Promise<UserEntity[]> {
+    return await this.usersService.findAll();
+  }
+
+  @Get('me')
+  getProfile(@CurrentUser() currentUser: UserEntity) {
+    if (!currentUser) {
+      throw new UnauthorizedException('You must be authenticated to access this resource');
+    }
+    return currentUser;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string) : Promise<UserEntity> {
+    return await this.usersService.findOne(+id);
   }
 
   @Patch(':id')
