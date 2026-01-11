@@ -10,6 +10,7 @@ import {hash, compare} from 'bcrypt';
 //import { sign } from 'jsonwebtoken';
 import * as jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
+import { Roles } from './utility/common/user-roles.enum';
 @Injectable()
 export class UsersService {
   constructor(
@@ -85,8 +86,38 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto, currentUser?: UserEntity): Promise<UserEntity> {
+    const user = await this.findOne(id);
+    
+    // If password is being updated, hash it
+    if (updateUserDto.password) {
+      updateUserDto.password = await hash(updateUserDto.password, 10);
+    }
+    
+    // If email is being updated, check if it already exists
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const emailExists = await this.findByEmail(updateUserDto.email);
+      if (emailExists) {
+        throw new Error('User with this email already exists');
+      }
+    }
+    
+    // If roles are being updated, check permissions
+    if (updateUserDto.roles !== undefined) {
+      // Allow users to update their own role (self-update)
+      // OR allow admins to update any user's role
+      const isSelfUpdate = currentUser && currentUser.id === id;
+      const isAdmin = currentUser && currentUser.roles === Roles.ADMIN;
+      
+      if (!isSelfUpdate && !isAdmin) {
+        // Remove roles from update if user is not updating themselves and not an admin
+        delete updateUserDto.roles;
+      }
+    }
+    
+    // Update the user
+    Object.assign(user, updateUserDto);
+    return await this.usersRepository.save(user);
   }
 
   remove(id: number) {

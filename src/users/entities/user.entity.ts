@@ -12,7 +12,7 @@ export class UserEntity {
     @Column({ select: false })
     password: string;
     @Column({type: 'enum', enum: Roles, default: Roles.USER})
-    roles: Roles[];
+    roles: Roles;
     @CreateDateColumn()
     createdAt: Timestamp;
     @UpdateDateColumn({type: 'timestamptz'})

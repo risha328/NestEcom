@@ -19,7 +19,17 @@ export class CurrentUserMiddleware implements NestMiddleware {
     async use(req: Request, res: Response, next: NextFunction) {
         // const { user } = req.body;
         // req.currentUser = user;
-        const authHeader = req.headers.authorization || req.headers.Authorization;
+        // Check headers first (preferred method)
+        let authHeader = req.headers.authorization || req.headers.Authorization;
+        
+        // Fallback to query parameter if not in headers (for testing purposes)
+        if (!authHeader || isArray(authHeader)) {
+            const queryAuth = req.query?.Authorization || req.query?.authorization;
+            if (queryAuth && typeof queryAuth === 'string') {
+                authHeader = queryAuth;
+            }
+        }
+        
         if(!authHeader || isArray(authHeader) || !authHeader.startsWith('Bearer')){
             req.currentUser = undefined;
             next();
