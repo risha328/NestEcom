@@ -4,12 +4,13 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
 //import { TestModule } from './test/test.module';
+import { CategoriesModule } from './categories/categories.module';
 import { UsersModule } from './users/users.module';
 import { CurrentUserMiddleware } from './users/utility/middlewares/current-user.middleware';
 //import { TestModule } from './test/test.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule],
+  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule, CategoriesModule],
   controllers: [AppController],
   providers: [AppService],
 })
