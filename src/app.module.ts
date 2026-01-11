@@ -10,7 +10,15 @@ import { CurrentUserMiddleware } from './users/utility/middlewares/current-user.
 //import { TestModule } from './test/test.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(dataSourceOptions), UsersModule, CategoriesModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      ...dataSourceOptions,
+      // Enable synchronize for development (disable in production)
+      synchronize: process.env.NODE_ENV !== 'production',
+    }), 
+    UsersModule, 
+    CategoriesModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
